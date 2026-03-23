@@ -1,0 +1,57 @@
+name: Tamil Playlist Update
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+jobs:
+  update-playlist:
+    runs-on: ubuntu-latest
+
+    env:
+      IPTV_URL: ${{ secrets.IPTV_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate file
+        run: |
+          mkdir -p Playlist/Tamil-local.m3u
+
+          FINAL_FILE=Playlist/Tamil-local.m3u/index.html
+
+          # HTML redirect
+          cat <<EOF > $FINAL_FILE
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="refresh" content="2;url=https://t.me/RKDYIPTV">
+</head>
+<body></body>
+</html>
+EOF
+
+          # M3U content append
+          echo '#EXTM3U' >> $FINAL_FILE
+          echo '# RKDYIPTV' >> $FINAL_FILE
+          echo "#Updated $(date)" >> $FINAL_FILE
+
+          echo '#EXTINF:-1 tvg-name="Join Telegram" group-title="RKDYIPTV",📢 Join @RKDYIPTV' >> $FINAL_FILE
+          echo 'https://t.me/RKDYIPTV' >> $FINAL_FILE
+
+          curl -L -s "$IPTV_URL" -o source.m3u
+          cat source.m3u >> $FINAL_FILE
+
+      - name: Commit
+        run: |
+          git config --global user.name "RKDYIPTV"
+          git config --global user.email "rkdyiptv@users.noreply.github.com"
+          git add Playlist/
+          git commit -m "Update Tamil Playlist - @RKDYIPTV" || echo "No changes"
+
+      - name: Push
+        run: |
+          git pull --rebase origin main
+          git push origin main
