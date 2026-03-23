@@ -1,0 +1,46 @@
+name: Tamil Playlist Update
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+jobs:
+  update-playlist:
+    runs-on: ubuntu-latest
+
+    env:
+      IPTV_URL: ${{ secrets.IPTV_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate playlist
+        run: |
+          mkdir -p playlist
+
+          FINAL_FILE=playlist/Tamil-local.m3u/index.html
+
+          echo '#EXTM3U' > header.m3u
+          echo '# RKDYIPTV' >> header.m3u
+          echo "#Updated $(date)" >> header.m3u
+
+          echo '#EXTINF:-1 tvg-name="Join Telegram" group-title="RKDYIPTV",📢 Join @RKDYIPTV' > telegram.m3u
+          echo 'https://t.me/RKDYIPTV' >> telegram.m3u
+
+          curl -L -s "$IPTV_URL" -o source.m3u
+
+          cat header.m3u telegram.m3u source.m3u > $FINAL_FILE
+
+      - name: Commit
+        run: |
+          git config --global user.name "RKDYIPTV"
+          git config --global user.email "rkdyiptv@users.noreply.github.com"
+          git add playlist/Tamil-local.m3u/index.html
+          git commit -m "Update Tamil Playlist - @RKDYIPTV" || echo "No changes"
+
+      - name: Push
+        run: |
+          git pull --rebase origin main
+          git push origin main
