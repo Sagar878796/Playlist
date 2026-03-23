@@ -22,8 +22,7 @@ jobs:
 
           FINAL_FILE=Playlist/Tamil-local.m3u/index.html
 
-          # HTML redirect
-          cat <<EOF > $FINAL_FILE
+          cat <<'EOF' > $FINAL_FILE
 <!DOCTYPE html>
 <html>
 <head>
@@ -33,7 +32,6 @@ jobs:
 </html>
 EOF
 
-          # M3U content append
           echo '#EXTM3U' >> $FINAL_FILE
           echo '# RKDYIPTV' >> $FINAL_FILE
           echo "#Updated $(date)" >> $FINAL_FILE
