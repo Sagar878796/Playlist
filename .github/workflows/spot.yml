@@ -21,7 +21,7 @@ jobs:
       - name: Generate playlist
         run: |
 
-          mkdir -p Playlist/Cricket.m3u
+          mkdir -p Playlist/Cric.m3u
 
           HTML=html.txt
           HEADER=header.m3u
@@ -102,7 +102,7 @@ jobs:
           # Final Playlist
           #################################
 
-          cat $HTML $HEADER clean.m3u > Playlist/Cricket.m3u/index.html
+          cat $HTML $HEADER clean.m3u > Playlist/Cric.m3u/index.html
 
 
       - name: Commit changes
