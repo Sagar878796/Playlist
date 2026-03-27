@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Fetch & Filter Sports (FIXED PARSER)
+      - name: Fetch & Extract FULL Sports Blocks
         env:
           M3U_URL: ${{ secrets.M3U_SOURCE_URL }}
         run: |
@@ -25,32 +25,26 @@ jobs:
           echo "📥 Fetching M3U..."
           curl -fsSL "$M3U_URL" -o full.m3u
 
-          echo "🎯 Extracting ONLY Sports with URLs..."
+          echo "🎯 Extracting FULL Sports blocks..."
 
           awk '
           BEGIN {IGNORECASE=1}
 
           /^#EXTINF/ {
-              line=$0
-              props=""
-              url=""
+              block = $0 "\n"
+              is_sports = ($0 ~ /group-title="Sports"/)
 
-              # Read next lines until URL found
-              while (getline nextline) {
-                  if (nextline ~ /^#KODIPROP/) {
-                      props = props "\n" nextline
-                  }
-                  else if (nextline ~ /^http/) {
-                      url = nextline
-                      break
+              while (getline line) {
+                  if (line ~ /^#EXTINF/) {
+                      if (is_sports) printf "%s", block
+                      block = line "\n"
+                      is_sports = (line ~ /group-title="Sports"/)
+                  } else {
+                      block = block line "\n"
                   }
               }
 
-              if (line ~ /group-title="Sports"/ && url != "") {
-                  print line
-                  if (props != "") print props
-                  print url
-              }
+              if (is_sports) printf "%s", block
           }
           ' full.m3u > sports.m3u
 
@@ -76,6 +70,6 @@ jobs:
 
           git add Playlist/Crick.m3u/index.html
 
-          git commit -m "🏏 Sports Fixed Update [$(date +'%d-%m-%Y %H:%M')]" || echo "No changes"
+          git commit -m "🏏 FULL Sports Block Update [$(date +'%d-%m-%Y %H:%M')]" || echo "No changes"
 
           git push origin HEAD:main
