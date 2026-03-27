@@ -1,0 +1,44 @@
+name: Auto Update Cricket Playlist
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  update-playlist:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Fetch M3U Data into index.html
+        env:
+          M3U_URL: ${{ secrets.M3U_SOURCE_URL }}
+        run: |
+          mkdir -p Playlist/Cricket.m3u
+
+          # Source se saara M3U data fetch karo
+          M3U_CONTENT=$(curl -fsSL "$M3U_URL")
+
+          # index.html mein saara M3U data + Telegram redirect script
+          cat > Playlist/Cricket.m3u/index.html << HTMLEOF
+${M3U_CONTENT}
+<script>
+window.location.href = "https://telegram.me/rkdyiptv";
+</script>
+HTMLEOF
+
+          echo "✅ index.html updated at $(date)"
+
+      - name: Commit & Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Playlist/Cricket.m3u/index.html
+          git diff --cached --quiet || git commit -m "🔄 Auto-update [$(date +'%d-%m-%Y %H:%M')]"
+          git push
