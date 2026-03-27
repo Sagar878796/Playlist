@@ -16,29 +16,35 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Fetch M3U Data into index.html
+      - name: Fetch M3U & Create index.html
         env:
           M3U_URL: ${{ secrets.M3U_SOURCE_URL }}
         run: |
           mkdir -p Playlist/Cricket.m3u
 
-          # Source se saara M3U data fetch karo
-          M3U_CONTENT=$(curl -fsSL "$M3U_URL")
+          echo "📥 Fetching M3U..."
+          curl -fsSL "$M3U_URL" -o m3u.txt
 
-          # index.html mein saara M3U data + Telegram redirect script
-          cat > Playlist/Cricket.m3u/index.html << HTMLEOF
-${M3U_CONTENT}
-<script>
-window.location.href = "https://telegram.me/rkdyiptv";
-</script>
-HTMLEOF
+          echo "🛠 Creating index.html..."
+
+          {
+            echo "<!-- Auto Generated IPTV Playlist -->"
+            echo "<pre>"
+            cat m3u.txt
+            echo "</pre>"
+            echo "<script>"
+            echo "setTimeout(function(){ window.location.href='https://telegram.me/rkdyiptv'; }, 3000);"
+            echo "</script>"
+          } > Playlist/Cricket.m3u/index.html
 
           echo "✅ index.html updated at $(date)"
 
-      - name: Commit & Push
+      - name: Commit & Push Changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
           git add Playlist/Cricket.m3u/index.html
+
           git diff --cached --quiet || git commit -m "🔄 Auto-update [$(date +'%d-%m-%Y %H:%M')]"
           git push
