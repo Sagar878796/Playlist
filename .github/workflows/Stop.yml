@@ -1,4 +1,4 @@
-name: Stop playlist
+name: Auto Update Cricket Playlist
 
 on:
   schedule:
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Fetch & Filter ONLY Sports
+      - name: Fetch & Filter Sports (FIXED PARSER)
         env:
           M3U_URL: ${{ secrets.M3U_SOURCE_URL }}
         run: |
@@ -25,18 +25,34 @@ jobs:
           echo "📥 Fetching M3U..."
           curl -fsSL "$M3U_URL" -o full.m3u
 
-          echo "🎯 Filtering Sports..."
+          echo "🎯 Extracting ONLY Sports with URLs..."
 
           awk '
           BEGIN {IGNORECASE=1}
+
           /^#EXTINF/ {
               line=$0
-              getline url
-              if (line ~ /group-title="Sports"/) {
+              props=""
+              url=""
+
+              # Read next lines until URL found
+              while (getline nextline) {
+                  if (nextline ~ /^#KODIPROP/) {
+                      props = props "\n" nextline
+                  }
+                  else if (nextline ~ /^http/) {
+                      url = nextline
+                      break
+                  }
+              }
+
+              if (line ~ /group-title="Sports"/ && url != "") {
                   print line
+                  if (props != "") print props
                   print url
               }
-          }' full.m3u > sports.m3u
+          }
+          ' full.m3u > sports.m3u
 
           echo "🛠 Creating index.html..."
 
@@ -60,6 +76,6 @@ jobs:
 
           git add Playlist/Crick.m3u/index.html
 
-          git commit -m "🏏 Sports Update [$(date +'%d-%m-%Y %H:%M')]" || echo "No changes"
+          git commit -m "🏏 Sports Fixed Update [$(date +'%d-%m-%Y %H:%M')]" || echo "No changes"
 
           git push origin HEAD:main
