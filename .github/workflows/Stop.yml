@@ -2,7 +2,7 @@ name: Auto Update Cricket Playlist
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/10 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Fetch & Filter Sports M3U
+      - name: Fetch & Filter ONLY Sports Category
         env:
           M3U_URL: ${{ secrets.M3U_SOURCE_URL }}
         run: |
@@ -25,11 +25,18 @@ jobs:
           echo "📥 Fetching M3U..."
           curl -fsSL "$M3U_URL" -o full.m3u
 
-          echo "🎯 Filtering Sports category..."
+          echo "🎯 Extracting ONLY group-title=\"Sports\" ..."
 
-          # Sports filter (case-insensitive)
-          awk 'BEGIN{IGNORECASE=1}
-          /group-title="sports"/ {print; getline; print}' full.m3u > sports.m3u
+          awk '
+          BEGIN {IGNORECASE=1}
+          /^#EXTINF/ {
+              line=$0
+              getline url
+              if (line ~ /group-title="Sports"/) {
+                  print line
+                  print url
+              }
+          }' full.m3u > sports.m3u
 
           echo "🛠 Creating index.html..."
 
@@ -53,5 +60,5 @@ jobs:
 
           git add Playlist/Cricket.m3u/index.html
 
-          git diff --cached --quiet || git commit -m "🏏 Sports Update [$(date +'%d-%m-%Y %H:%M')]"
+          git diff --cached --quiet || git commit -m "🏏 Sports Only [$(date +'%d-%m-%Y %H:%M')]"
           git push
