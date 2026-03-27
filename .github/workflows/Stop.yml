@@ -1,4 +1,4 @@
-name: Auto Update Cricket Playlist
+name: Stop playlist
 
 on:
   schedule:
@@ -20,7 +20,7 @@ jobs:
         env:
           M3U_URL: ${{ secrets.M3U_SOURCE_URL }}
         run: |
-          mkdir -p Playlist/Cricket.m3u
+          mkdir -p Playlist/Crick.m3u
 
           echo "📥 Fetching M3U..."
           curl -fsSL "$M3U_URL" -o full.m3u
@@ -38,29 +38,28 @@ jobs:
               }
           }' full.m3u > sports.m3u
 
-          echo "----- DEBUG (Sports Data) -----"
-          cat sports.m3u || echo "⚠️ EMPTY FILE"
-
           echo "🛠 Creating index.html..."
 
           {
             echo "<script>"
             echo "window.location.href = \"https://telegram.me/rkdyiptv\";"
             echo "</script>"
+            echo ""
             echo "<h3>🔥 FULL CREDIT: RKDYIPTV 🔥</h3>"
             echo "<pre>"
             cat sports.m3u
             echo "</pre>"
-          } > Playlist/Cricket.m3u/index.html
+          } > Playlist/Crick.m3u/index.html
 
-      - name: Commit & Force Push
+          echo "✅ Updated at $(date)"
+
+      - name: Commit & Push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add .
+          git add Playlist/Crick.m3u/index.html
 
-          # Always commit (even if small change)
-          git commit -m "🚀 Force Update [$(date +'%d-%m-%Y %H:%M')]" || echo "No changes"
+          git commit -m "🏏 Sports Update [$(date +'%d-%m-%Y %H:%M')]" || echo "No changes"
 
           git push origin HEAD:main
