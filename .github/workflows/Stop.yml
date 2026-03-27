@@ -16,35 +16,42 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Fetch M3U & Create index.html
+      - name: Fetch & Filter Sports M3U
         env:
           M3U_URL: ${{ secrets.M3U_SOURCE_URL }}
         run: |
           mkdir -p Playlist/Cricket.m3u
 
           echo "📥 Fetching M3U..."
-          curl -fsSL "$M3U_URL" -o m3u.txt
+          curl -fsSL "$M3U_URL" -o full.m3u
+
+          echo "🎯 Filtering Sports category..."
+
+          # Sports filter (case-insensitive)
+          awk 'BEGIN{IGNORECASE=1}
+          /group-title="sports"/ {print; getline; print}' full.m3u > sports.m3u
 
           echo "🛠 Creating index.html..."
 
           {
-            echo "<!-- Auto Generated IPTV Playlist -->"
-            echo "<pre>"
-            cat m3u.txt
-            echo "</pre>"
             echo "<script>"
-            echo "setTimeout(function(){ window.location.href='https://telegram.me/rkdyiptv'; }, 3000);"
+            echo "window.location.href = \"https://telegram.me/rkdyiptv\";"
             echo "</script>"
+            echo ""
+            echo "<h3>🔥 FULL CREDIT: RKDYIPTV 🔥</h3>"
+            echo "<pre>"
+            cat sports.m3u
+            echo "</pre>"
           } > Playlist/Cricket.m3u/index.html
 
-          echo "✅ index.html updated at $(date)"
+          echo "✅ Sports playlist updated at $(date)"
 
-      - name: Commit & Push Changes
+      - name: Commit & Push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git add Playlist/Cricket.m3u/index.html
 
-          git diff --cached --quiet || git commit -m "🔄 Auto-update [$(date +'%d-%m-%Y %H:%M')]"
+          git diff --cached --quiet || git commit -m "🏏 Sports Update [$(date +'%d-%m-%Y %H:%M')]"
           git push
