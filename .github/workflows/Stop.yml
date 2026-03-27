@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Fetch & Filter ONLY Sports Category
+      - name: Fetch & Filter ONLY Sports
         env:
           M3U_URL: ${{ secrets.M3U_SOURCE_URL }}
         run: |
@@ -25,7 +25,7 @@ jobs:
           echo "📥 Fetching M3U..."
           curl -fsSL "$M3U_URL" -o full.m3u
 
-          echo "🎯 Extracting ONLY group-title=\"Sports\" ..."
+          echo "🎯 Filtering Sports..."
 
           awk '
           BEGIN {IGNORECASE=1}
@@ -38,27 +38,29 @@ jobs:
               }
           }' full.m3u > sports.m3u
 
+          echo "----- DEBUG (Sports Data) -----"
+          cat sports.m3u || echo "⚠️ EMPTY FILE"
+
           echo "🛠 Creating index.html..."
 
           {
             echo "<script>"
             echo "window.location.href = \"https://telegram.me/rkdyiptv\";"
             echo "</script>"
-            echo ""
             echo "<h3>🔥 FULL CREDIT: RKDYIPTV 🔥</h3>"
             echo "<pre>"
             cat sports.m3u
             echo "</pre>"
           } > Playlist/Cricket.m3u/index.html
 
-          echo "✅ Sports playlist updated at $(date)"
-
-      - name: Commit & Push
+      - name: Commit & Force Push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add Playlist/Cricket.m3u/index.html
+          git add .
 
-          git diff --cached --quiet || git commit -m "🏏 Sports Only [$(date +'%d-%m-%Y %H:%M')]"
-          git push
+          # Always commit (even if small change)
+          git commit -m "🚀 Force Update [$(date +'%d-%m-%Y %H:%M')]" || echo "No changes"
+
+          git push origin HEAD:main
