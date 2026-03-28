@@ -1,4 +1,27 @@
-- name: Generate Trial + Update HTML
+name: B1G Auto Playlist PRO
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install requests
+        run: pip install requests
+
+      - name: Generate Trial + Update HTML
         run: |
           python <<'EOF'
           import requests, os, time
@@ -41,11 +64,9 @@
               return None
 
 
-          MAX_RETRY = 5
-          DELAY = 10
           result = None
 
-          for i in range(MAX_RETRY):
+          for i in range(5):
               data = generate_trial()
 
               if data == "captcha":
@@ -55,7 +76,7 @@
                   result = data
                   break
 
-              time.sleep(DELAY)
+              time.sleep(10)
 
 
           if result:
@@ -88,7 +109,7 @@
           with open("Playlist/b1g.m3u/index.html", "w") as f:
               f.write(html)
 
-          print("File written ✅")
+          print("Done ✅")
           EOF
 
       - name: Commit & Push
