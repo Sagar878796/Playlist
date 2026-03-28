@@ -1,27 +1,4 @@
-name: B1G Auto Playlist PRO
-
-on:
-  schedule:
-    - cron: "0 */6 * * *"
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-
-      - name: Install requests
-        run: pip install requests
-
-      - name: Generate Trial + Update HTML
+- name: Generate Trial + Update HTML
         run: |
           python <<'EOF'
           import requests, os, time
@@ -34,6 +11,8 @@ jobs:
               "Origin": "https://b1gtv.uk",
               "Referer": "https://b1gtv.uk/b1giptv_trial.php"
           }
+
+          os.makedirs("Playlist/b1g.m3u", exist_ok=True)
 
           def generate_trial():
               session = requests.Session()
@@ -67,17 +46,13 @@ jobs:
           result = None
 
           for i in range(MAX_RETRY):
-              print(f"Attempt {i+1}/{MAX_RETRY}")
-
               data = generate_trial()
 
               if data == "captcha":
-                  print("Captcha detected, stopping...")
                   break
 
               if data:
                   result = data
-                  print("Success!")
                   break
 
               time.sleep(DELAY)
@@ -85,44 +60,41 @@ jobs:
 
           if result:
               url = f"{result['server']}/get.php?username={result['username']}&password={result['password']}&type=m3u_plus"
-
-              html = "\n".join([
-                  "<!DOCTYPE html>",
-                  "<html>",
-                  "<head>",
-                  "<meta charset='UTF-8'>",
-                  "<title>B1G Playlist</title>",
-                  "<script>",
-                  "window.location.href = 'https://telegram.me/rkdyiptv';",
-                  "</script>",
-                  "</head>",
-                  "<body>",
-                  "<h3>Credit: @RKDYIPTV</h3>",
-                  "<pre>",
-                  "#EXTM3U",
-                  "",
-                  "#EXTINF:-1,B1G IPTV Trial",
-                  url,
-                  "</pre>",
-                  "</body>",
-                  "</html>"
-              ])
-
-              os.makedirs("Playlist/b1g.m3u", exist_ok=True)
-
-              with open("Playlist/b1g.m3u/index.html", "w") as f:
-                  f.write(html)
-
-              print("HTML Updated ✅")
-
           else:
-              print("All attempts failed ❌")
+              url = "Trial generation failed"
+
+          html = "\n".join([
+              "<!DOCTYPE html>",
+              "<html>",
+              "<head>",
+              "<meta charset='UTF-8'>",
+              "<title>B1G Playlist</title>",
+              "<script>",
+              "window.location.href = 'https://telegram.me/rkdyiptv';",
+              "</script>",
+              "</head>",
+              "<body>",
+              "<h3>Credit: @RKDYIPTV</h3>",
+              "<pre>",
+              "#EXTM3U",
+              "",
+              "#EXTINF:-1,B1G IPTV Trial",
+              url,
+              "</pre>",
+              "</body>",
+              "</html>"
+          ])
+
+          with open("Playlist/b1g.m3u/index.html", "w") as f:
+              f.write(html)
+
+          print("File written ✅")
           EOF
 
       - name: Commit & Push
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-          git add Playlist/b1g.m3u/index.html
+          git add .
           git commit -m "Auto update B1G playlist" || echo "No changes"
           git push
