@@ -21,7 +21,7 @@ jobs:
       - name: Install requests
         run: pip install requests
 
-      - name: Generate Trial (Retry System)
+      - name: Generate Trial + Update HTML
         run: |
           python <<'EOF'
           import requests, os, time
@@ -54,7 +54,6 @@ jobs:
                       return gen["data"]
 
                   if gen.get("needs_captcha"):
-                      print("Captcha required")
                       return "captcha"
 
               except Exception as e:
@@ -65,7 +64,6 @@ jobs:
 
           MAX_RETRY = 5
           DELAY = 10
-
           result = None
 
           for i in range(MAX_RETRY):
@@ -74,10 +72,12 @@ jobs:
               data = generate_trial()
 
               if data == "captcha":
+                  print("Captcha detected, stopping...")
                   break
 
               if data:
                   result = data
+                  print("Success!")
                   break
 
               time.sleep(DELAY)
@@ -86,35 +86,31 @@ jobs:
           if result:
               url = f"{result['server']}/get.php?username={result['username']}&password={result['password']}&type=m3u_plus"
 
-              html = f"""<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>B1G Playlist</title>
-
-<script>
-window.location.href = "https://telegram.me/rkdyiptv";
-</script>
-
-</head>
-<body>
-
-<h3>Credit: @RKDYIPTV</h3>
-
-<pre>
-#EXTM3U
-
-#EXTINF:-1,B1G IPTV Trial
-{url}
-</pre>
-
-</body>
-</html>
-"""
+              html = "\n".join([
+                  "<!DOCTYPE html>",
+                  "<html>",
+                  "<head>",
+                  "<meta charset='UTF-8'>",
+                  "<title>B1G Playlist</title>",
+                  "<script>",
+                  "window.location.href = 'https://telegram.me/rkdyiptv';",
+                  "</script>",
+                  "</head>",
+                  "<body>",
+                  "<h3>Credit: @RKDYIPTV</h3>",
+                  "<pre>",
+                  "#EXTM3U",
+                  "",
+                  "#EXTINF:-1,B1G IPTV Trial",
+                  url,
+                  "</pre>",
+                  "</body>",
+                  "</html>"
+              ])
 
               os.makedirs("Playlist/b1g.m3u", exist_ok=True)
 
-              with open("Playlist/b1g.m3u/index.html","w") as f:
+              with open("Playlist/b1g.m3u/index.html", "w") as f:
                   f.write(html)
 
               print("HTML Updated ✅")
