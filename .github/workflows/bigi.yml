@@ -23,72 +23,70 @@ jobs:
 
       - name: Generate Trial (Retry System)
         run: |
-          python <<EOF
-import requests, os, time
+          python <<'EOF'
+          import requests, os, time
 
-API_URL = "https://bt.b1gtv.uk/generate.php"
+          API_URL = "https://bt.b1gtv.uk/generate.php"
 
-headers = {
-    "User-Agent": "Mozilla/5.0",
-    "Content-Type": "application/x-www-form-urlencoded",
-    "Origin": "https://b1gtv.uk",
-    "Referer": "https://b1gtv.uk/b1giptv_trial.php"
-}
+          headers = {
+              "User-Agent": "Mozilla/5.0",
+              "Content-Type": "application/x-www-form-urlencoded",
+              "Origin": "https://b1gtv.uk",
+              "Referer": "https://b1gtv.uk/b1giptv_trial.php"
+          }
 
-def generate_trial():
-    session = requests.Session()
+          def generate_trial():
+              session = requests.Session()
+              try:
+                  init = session.post(API_URL, headers=headers, data={"action":"init"}).json()
+                  if not init.get("success"):
+                      return None
 
-    try:
-        init = session.post(API_URL, headers=headers, data={"action":"init"}, timeout=10).json()
-        if not init.get("success"):
-            return None
+                  token = init.get("token")
 
-        token = init.get("token")
+                  gen = session.post(API_URL, headers=headers, data={
+                      "action": "generate",
+                      "widget_token": token,
+                      "page": "https://b1gtv.uk/b1giptv_trial.php"
+                  }).json()
 
-        gen = session.post(API_URL, headers=headers, data={
-            "action": "generate",
-            "widget_token": token,
-            "page": "https://b1gtv.uk/b1giptv_trial.php"
-        }, timeout=10).json()
+                  if gen.get("success"):
+                      return gen["data"]
 
-        if gen.get("success"):
-            return gen["data"]
+                  if gen.get("needs_captcha"):
+                      print("Captcha required")
+                      return "captcha"
 
-        if gen.get("needs_captcha"):
-            print("Captcha required")
-            return "captcha"
+              except Exception as e:
+                  print("Error:", e)
 
-    except Exception as e:
-        print("Error:", e)
-
-    return None
+              return None
 
 
-MAX_RETRY = 5
-DELAY = 10
+          MAX_RETRY = 5
+          DELAY = 10
 
-result = None
+          result = None
 
-for i in range(MAX_RETRY):
-    print(f"Attempt {i+1}/{MAX_RETRY}")
+          for i in range(MAX_RETRY):
+              print(f"Attempt {i+1}/{MAX_RETRY}")
 
-    data = generate_trial()
+              data = generate_trial()
 
-    if data == "captcha":
-        print("Skipping due to captcha")
-        break
+              if data == "captcha":
+                  break
 
-    if data:
-        result = data
-        print("Success!")
-        break
+              if data:
+                  result = data
+                  break
 
-    time.sleep(DELAY)
+              time.sleep(DELAY)
 
-if result:
-    url = f"{result['server']}/get.php?username={result['username']}&password={result['password']}&type=m3u_plus"
 
-    html = f"""<!DOCTYPE html>
+          if result:
+              url = f"{result['server']}/get.php?username={result['username']}&password={result['password']}&type=m3u_plus"
+
+              html = f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -114,16 +112,16 @@ window.location.href = "https://telegram.me/rkdyiptv";
 </html>
 """
 
-    os.makedirs("Playlist/b1g.m3u", exist_ok=True)
+              os.makedirs("Playlist/b1g.m3u", exist_ok=True)
 
-    with open("Playlist/b1g.m3u/index.html","w") as f:
-        f.write(html)
+              with open("Playlist/b1g.m3u/index.html","w") as f:
+                  f.write(html)
 
-    print("HTML Updated ✅")
+              print("HTML Updated ✅")
 
-else:
-    print("All attempts failed ❌")
-EOF
+          else:
+              print("All attempts failed ❌")
+          EOF
 
       - name: Commit & Push
         run: |
