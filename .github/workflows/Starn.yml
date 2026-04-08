@@ -1,7 +1,9 @@
-name: Generate IPTV Playlist
+name: Star Playlist Auto Update
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *"   # ✅ har 30 min
 
 jobs:
   build:
@@ -16,7 +18,7 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Install Dependencies
+      - name: Install Requests
         run: pip install requests
 
       - name: Run Script
@@ -24,8 +26,8 @@ jobs:
 
       - name: Commit Playlist
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.name "rkdyiptv"
+          git config --global user.email "rk@github.com"
           git add .
-          git commit -m "Update Playlist" || echo "No changes"
+          git commit -m "Auto Update Playlist" || echo "No changes"
           git push
