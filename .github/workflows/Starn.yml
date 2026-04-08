@@ -20,7 +20,7 @@ jobs:
         run: pip install requests
 
       - name: Run Script
-        run: python star.py
+        run: python script.py
 
       - name: Commit Playlist
         run: |
