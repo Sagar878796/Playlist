@@ -1,7 +1,7 @@
 // ============================================
 // Stalker-Portal To M3U Generator Script v3.0
-// Created by: @rkdyiptv 
-// Telegram: https://t.me/rkdyiptv
+// Created by: 
+// Telegram: 
 // ============================================
 
 // ============ CONFIGURATION ============
@@ -720,39 +720,7 @@ function generateTelegramRedirectPage() {
             100% { transform: rotate(360deg); }
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <div class="telegram-icon">
-            <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#2AABEE;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#229ED9;stop-opacity:1" />
-                    </linearGradient>
-                </defs>
-                <circle cx="120" cy="120" r="120" fill="url(#gradient)"/>
-                <path fill="#ffffff" d="M81.229 128.772l14.237 39.406s1.78 3.687 3.686 3.687 30.255-29.492 30.255-29.492l31.525-60.89L81.737 118.6z"/>
-                <path fill="#d2e5f1" d="M100.106 138.878l-2.733 29.046s-1.144 8.9 7.754 0 17.415-15.763 17.415-15.763"/>
-                <path fill="#b5cfe4" d="M81.486 130.178l-17.8-5.467s-2.006-.801-1.38-2.602c.138-.396.396-.771.99-1.174 4.866-3.293 96.787-36.666 96.787-36.666s1.794-.893 3.140-.84c.817.031 1.668.29 2.09 1.322.164.403.24.808.24 1.21l-.013.481v.046c-.013.303-.033.606-.053.909a28.89 28.89 0 0 1-.139 1.554c-.184 1.454-.515 3.564-.978 6.238a2141.917 2141.917 0 0 1-12.643 56.926c-.45 1.846-1.333 2.602-2.219 2.668a5.33 5.33 0 0 1-1.203-.105c-.908-.192-2.054-.65-3.186-1.107a503.063 503.063 0 0 1-5.467-2.272c-9.99-4.222-20.9-8.844-23.91-10.247-.394-.184-.79-.368-1.106-.514a2.658 2.658 0 0 1-.698-.396c-.658-.461-1.057-1.107-.553-1.874.132-.2.264-.382.396-.553 2.602-2.602 29.492-26.653 40.264-36.903.553-.527.105-1.265-.61-.738l-49.866 32.768c-.197.132-.395.263-.592.382a9.613 9.613 0 0 1-2.324 1.015c-.908.264-1.874.396-2.815.396h-.066c-1.322 0-2.617-.304-3.859-.817z"/>
-            </svg>
-        </div>
-        <h1>🚀 Redirecting to Telegram</h1>
-        <p>You will be redirected to our Telegram channel</p>
-        <div class="channel">${TELEGRAM_CHANNEL}</div>
-        <p>For support, updates & more!</p>
-        <a href="${TELEGRAM_URL}" class="btn">Join Now</a>
-        <div class="spinner"></div>
-    </div>
-    <script>
-        setTimeout(() => {
-            window.location.href = '${TELEGRAM_URL}';
-        }, 3000);
-    </script>
-</body>
-</html>
-    `.trim();
-}
+
 
 // ============ MAIN REQUEST HANDLER ============
 addEventListener('fetch', event => {
