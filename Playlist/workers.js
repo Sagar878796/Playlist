@@ -18,8 +18,8 @@ const config = {
 // ============ TOKEN CONFIGURATION ============
 const STATIC_KEY = typeof STATIC_KEY !== 'undefined' ? STATIC_KEY : 'join-tg-rkdyiptv'; // Static key (required)
 const TOKEN_REQUIRED = typeof REQUIRE_TOKEN !== 'undefined' ? REQUIRE_TOKEN === 'true' : true;
-const TELEGRAM_CHANNEL = '@RKDYIPTV';
-const TELEGRAM_URL = 'https://t.me/RKDYIPTV';
+const TELEGRAM_CHANNEL = '';
+const TELEGRAM_URL = '';
 
 // Dynamic token settings
 const DYNAMIC_TOKEN_ENABLED = true;
@@ -737,12 +737,7 @@ function generateTelegramRedirectPage() {
                 <path fill="#b5cfe4" d="M81.486 130.178l-17.8-5.467s-2.006-.801-1.38-2.602c.138-.396.396-.771.99-1.174 4.866-3.293 96.787-36.666 96.787-36.666s1.794-.893 3.140-.84c.817.031 1.668.29 2.09 1.322.164.403.24.808.24 1.21l-.013.481v.046c-.013.303-.033.606-.053.909a28.89 28.89 0 0 1-.139 1.554c-.184 1.454-.515 3.564-.978 6.238a2141.917 2141.917 0 0 1-12.643 56.926c-.45 1.846-1.333 2.602-2.219 2.668a5.33 5.33 0 0 1-1.203-.105c-.908-.192-2.054-.65-3.186-1.107a503.063 503.063 0 0 1-5.467-2.272c-9.99-4.222-20.9-8.844-23.91-10.247-.394-.184-.79-.368-1.106-.514a2.658 2.658 0 0 1-.698-.396c-.658-.461-1.057-1.107-.553-1.874.132-.2.264-.382.396-.553 2.602-2.602 29.492-26.653 40.264-36.903.553-.527.105-1.265-.61-.738l-49.866 32.768c-.197.132-.395.263-.592.382a9.613 9.613 0 0 1-2.324 1.015c-.908.264-1.874.396-2.815.396h-.066c-1.322 0-2.617-.304-3.859-.817z"/>
             </svg>
         </div>
-        <h1>🚀 Redirecting to Telegram</h1>
-        <p>You will be redirected to our Telegram channel</p>
-        <div class="channel">${TELEGRAM_CHANNEL}</div>
-        <p>For support, updates & more!</p>
-        <a href="${TELEGRAM_URL}" class="btn">Join Now</a>
-        <div class="spinner"></div>
+        
     </div>
     <script>
         setTimeout(() => {
